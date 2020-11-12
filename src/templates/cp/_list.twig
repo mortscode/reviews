@@ -1,0 +1,46 @@
+{% extends "_layouts/cp" %}
+{% import '_includes/forms' as forms %}
+
+{% set entry = craft.entries.id(entryId).one() %}
+{% set reviews = craft.reviews.getEntryReviews(entryId) %}
+
+{% set crumbs = [
+    { label: 'Reviews', url: url('reviews') }
+] %}
+
+{% set title = entry.title %}
+
+{% block content %}
+	<table class="data fullwidth">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Email</th>
+				<th>Date</th>
+				<th>Responded</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for review in reviews %}
+				<tr>
+					{# name #}
+					<td>
+						<a href="{{ url('reviews/entries/' ~ entry.id ~ '/' ~ review.id) }}">
+							{{ review.name }}
+						</a>
+					</td>
+					{# email #}
+					<td>{{ review.email }}</td>
+					{# date #}
+					<td>{{ review.dateUpdated|date }}</td>
+					{# reponded #}
+					<td>
+						{% if review.response %}
+							<span class="icon" data-icon="check"></span>
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

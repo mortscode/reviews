@@ -1,0 +1,80 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Reviews plugin for Craft CMS 3.x
+ *
+ * Reviews index.twig
+ *
+ * @author    Scot Mortimer
+ * @copyright Copyright (c) 2020 Scot Mortimer
+ * @link      https://github.com/mortscode
+ * @package   Reviews
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("mortscode\\reviews\\assetbundles\\reviews\\ReviewsAsset") %}
+{% do view.registerAssetBundle("mortscode\\reviews\\assetbundles\\indexcpsection\\IndexCPSectionAsset") %}
+
+{# Link for the ? icon at the bottom of the page #}
+{% set docsUrl = "https://github.com/mortscode/reviews/blob/master/README.md" %}
+
+{# The title of this CP section #}
+{% set title = "Reviews" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('reviews') %}
+
+{# Get a URL to an image in our AssetBundle #}
+{% set iconUrl = view.getAssetManager().getPublishedUrl('@mortscode/reviews/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
+
+{# Content that should appear in the page header#}
+{% set extraPageHeaderHtml %}
+    <div class="buttons">
+        <a href="{{ pluginCpUrl }}" class="btn submit add icon">{{ "Click Me!"|t('reviews') }}</a>
+    </div>
+{% endset %}
+
+{% set entries = craft.reviews.getReviewedEntries.all() %}
+
+{# The content of the CP Section#}
+{% block content %}
+    <table class="data fullwidth">
+        <thead>
+            <tr>
+                <th>Recipe</th>
+                <th>Link</th>
+                <th>Last Updated</th>
+                <th>Average Rating</th>
+                <th>Total Ratings</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entry in entries %}
+            {% set rating = craft.reviews.getEntryRatings(entry.id) %}
+            <tr>
+                <td>
+                    <a href="{{ url('reviews/entries/' ~ entry.id) }}">
+                        {{ entry.title }}
+                    </a>
+                </td>
+                <td>
+                {% if entry.url %}
+                    <a href="{{ entry.url }}" class="go" target="_blank">
+                        {{ entry.uri }}
+                    </a>
+                {% endif %}
+                </td>
+                <td>{{ entry.dateUpdated|date }}</td>
+                <td>{{ rating.averageRating }}</td>
+                <td>{{ rating.totalRatings }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

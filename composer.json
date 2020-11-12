@@ -1,0 +1,49 @@
+{
+    "name": "mortscode/reviews",
+    "description": "An entry reviews plugin",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "reviews"
+    ],
+    "support": {
+        "docs": "https://github.com/mortscode/reviews/blob/master/README.md",
+        "issues": "https://github.com/mortscode/reviews/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Scot Mortimer",
+            "homepage": "https://github.com/mortscode"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0"
+    },
+    "require-dev": {
+      "craftcms/cms": "^3.2.0",
+      "codeception/codeception": "^3.0",
+      "vlucas/phpdotenv": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+          "mortscode\\reviews\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Reviews",
+        "handle": "reviews",
+        "developer": "Scot Mortimer",
+        "developerUrl": "https://github.com/mortscode",
+        "documentationUrl": "https://github.com/mortscode/reviews/blob/master/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/mortscode/reviews/master/CHANGELOG.md",
+        "components": {
+            "reviewsService": "mortscode\\reviews\\services\\ReviewsService"
+        },
+        "class": "mortscode\\reviews\\Reviews"
+    }
+}

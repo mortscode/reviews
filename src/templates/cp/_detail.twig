@@ -1,0 +1,57 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set fullPageForm = true %}
+
+{% set entry = craft.entries.id(entryId).one() %}
+{% set review = craft.reviews.getReviewById(reviewId) %}
+
+{% set title = entry.title %}
+
+{% set crumbs = [
+    { label: 'Reviews', url: url('reviews') },
+    { label: entry.title, url: url('reviews/entries/' ~ entry.id) },
+] %}
+
+{% block details %}
+	<div id="settings" class="meta">
+		{{ forms.selectField({
+			label: "Status",
+			id: 'status',
+			name: 'status',
+			options: [{label: 'Approved', value: 'approved'}, {label: 'Other', value: 'other'}],
+			value: review.status ?? status[0] ?? null
+		}) }}
+	</div>
+{% endblock %}
+
+{% block content %}
+	<input type="hidden" name="action" value="reviews/reviews/update">
+	<input type="hidden" name="reviewId" value="{{ review.id }}">
+	<input type="hidden" name="name" value="{{ review.name }}">
+	<input type="hidden" name="email" value="{{ review.email }}">
+	<input type="hidden" name="rating" value="{{ review.rating }}">
+	<input type="hidden" name="comment" value="{{ review.comment }}">
+	{{ redirectInput('reviews') }}
+
+	<div id="rating">
+		<div class="rating-content">
+			<h1 class="rating-name">{{ review.name }}</h1>
+			<p class="rating-email">{{ review.email }}</p>
+			<p class="rating-rating">Rating:
+				{{ review.rating }}
+				/ 5</p>
+			<p class="rating-comment">{{ review.comment }}</p>
+		</div>
+		<hr>
+		{{ forms.textAreaField({
+            first: true,
+            label: 'Response',
+            id: 'response',
+            name: 'response',
+            rows: '5',
+            value: review.response ?? '',
+            errors: comment.getErrors('response') ?? '',
+        }) }}
+	</div>
+{% endblock %}
