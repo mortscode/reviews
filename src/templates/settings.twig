@@ -17,10 +17,20 @@
 
 {% do view.registerAssetBundle("mortscode\\reviews\\assetbundles\\reviews\\ReviewsAsset") %}
 
-{{ forms.textField({
-    label: 'Some Field',
-    instructions: 'Enter some setting here.',
-    id: 'someAttribute',
-    name: 'someAttribute',
-    value: settings['someAttribute']})
-}}
+{% set statusOptions = [
+	{label: 'Approved', value: 'approved'},
+	{label: 'Pending', value: 'pending'},
+	{label: 'Spam', value: 'spam'},
+	{label: 'Trashed', value: 'trashed'},
+] %}
+
+{% set statusLabel = "<span class='status " ~ settings.defaultStatus ~ "'></span>Default Status" %}
+
+{{ forms.selectField({
+    label: statusLabel,
+    id: 'default-status',
+    name: 'defaultStatus',
+    options: statusOptions,
+    value: settings.defaultStatus,
+    first: true
+}) }}

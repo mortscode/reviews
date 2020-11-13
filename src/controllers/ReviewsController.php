@@ -62,12 +62,14 @@ class ReviewsController extends Controller
 
         $request = Craft::$app->getRequest();
         $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
+        $settings = Reviews::$plugin->getSettings();
 
         $attributes[] = [
             'name' => Craft::$app->getRequest()->getRequiredParam('name'),
             'email' => Craft::$app->getRequest()->getRequiredParam('email'),
             'rating' => Craft::$app->getRequest()->getParam('rating'),
             'comment' => Craft::$app->getRequest()->getParam('comment'),
+            'status' => $settings->defaultStatus,
             'response' => NULL,
         ];
 
@@ -79,16 +81,18 @@ class ReviewsController extends Controller
     public function actionUpdate()
     {
         $this->requirePostRequest();
-
+        
         $request = Craft::$app->getRequest();
+        $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
         $reviewId = Craft::$app->getRequest()->getRequiredParam('reviewId');
 
         $attributes[] = [
             'response' => Craft::$app->getRequest()->getParam('response') ?? '',
+            'status' => Craft::$app->getRequest()->getParam('status') ?? '',
         ];
 
         Reviews::$plugin->reviews->updateReviewRecord($reviewId, $attributes[0]);
 
-        return $this->redirectToPostedUrl();
+        return $this->redirect('reviews/entries/' . $entryId);
     }
 }

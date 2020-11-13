@@ -11,6 +11,7 @@
 namespace mortscode\reviews\models;
 
 use mortscode\reviews\Reviews;
+use mortscode\reviews\enums\ReviewStatus;
 
 use Craft;
 use craft\base\Model;
@@ -35,11 +36,11 @@ class Settings extends Model
     // =========================================================================
 
     /**
-     * Some field model attribute
+     * default status for new reviews
      *
      * @var string
      */
-    public $someAttribute = 'Some Default';
+    public $defaultStatus = ReviewStatus::Pending;
 
     // Public Methods
     // =========================================================================
@@ -57,8 +58,7 @@ class Settings extends Model
     public function rules()
     {
         return [
-            ['someAttribute', 'string'],
-            ['someAttribute', 'default', 'value' => 'Some Default'],
+            ['defaultStatus', 'string'],
         ];
     }
 }

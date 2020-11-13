@@ -1,6 +1,8 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
+{% do view.registerAssetBundle("mortscode\\reviews\\assetbundles\\reviews\\ReviewsAsset") %}
+
 {% set fullPageForm = true %}
 
 {% set entry = craft.entries.id(entryId).one() %}
@@ -13,20 +15,30 @@
     { label: entry.title, url: url('reviews/entries/' ~ entry.id) },
 ] %}
 
+{% set statusOptions = [
+	{label: 'Approved', value: 'approved'},
+	{label: 'Pending', value: 'pending'},
+	{label: 'Spam', value: 'spam'},
+	{label: 'Trashed', value: 'trashed'},
+] %}
+
+{% set statusLabel = "<span class='status " ~ review.status ~ "'></span>Status" %}
+
 {% block details %}
 	<div id="settings" class="meta">
 		{{ forms.selectField({
-			label: "Status",
+			label: statusLabel,
 			id: 'status',
 			name: 'status',
-			options: [{label: 'Approved', value: 'approved'}, {label: 'Other', value: 'other'}],
-			value: review.status ?? status[0] ?? null
+			options: statusOptions,
+			value: review.status ?? null
 		}) }}
 	</div>
 {% endblock %}
 
 {% block content %}
 	<input type="hidden" name="action" value="reviews/reviews/update">
+	<input type="hidden" name="entryId" value="{{ entry.id }}">
 	<input type="hidden" name="reviewId" value="{{ review.id }}">
 	<input type="hidden" name="name" value="{{ review.name }}">
 	<input type="hidden" name="email" value="{{ review.email }}">

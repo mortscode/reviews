@@ -162,6 +162,7 @@ class ReviewsService extends Component
         $reviewsRecord->email = $attributes['email'];
         $reviewsRecord->rating = $attributes['rating'];
         $reviewsRecord->comment = $attributes['comment'];
+        $reviewsRecord->status = $attributes['status'];
 
         // save record in DB
         $reviewsRecord->save();
@@ -179,6 +180,7 @@ class ReviewsService extends Component
             ->where(['id' => $reviewId])
             ->one();
         $reviewsRecord->response = $attributes['response'];
+        $reviewsRecord->status = $attributes['status'];
 
         // save record in DB
         $reviewsRecord->save();

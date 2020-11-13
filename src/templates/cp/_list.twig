@@ -1,6 +1,8 @@
 {% extends "_layouts/cp" %}
 {% import '_includes/forms' as forms %}
 
+{% do view.registerAssetBundle("mortscode\\reviews\\assetbundles\\reviews\\ReviewsAsset") %}
+
 {% set entry = craft.entries.id(entryId).one() %}
 {% set reviews = craft.reviews.getEntryReviews(entryId) %}
 
@@ -17,6 +19,7 @@
 				<th>Name</th>
 				<th>Email</th>
 				<th>Date</th>
+				<th>Status</th>
 				<th>Responded</th>
 			</tr>
 		</thead>
@@ -33,6 +36,13 @@
 					<td>{{ review.email }}</td>
 					{# date #}
 					<td>{{ review.dateUpdated|date }}</td>
+					{# status #}
+					<td>
+						{% if review.status %}
+							<span class="status {{ review.status }}"></span>
+							{{ review.status|capitalize }}
+						{% endif %}
+					</td>
 					{# reponded #}
 					<td>
 						{% if review.response %}
