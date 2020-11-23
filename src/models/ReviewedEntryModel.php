@@ -42,6 +42,16 @@ class ReviewedEntryModel extends Model
      */
     public $averageRating;
 
+    /**
+     * @var int|null Approved Reviews
+     */
+    public $approvedReviews;
+   
+    /**
+     * @var int|null Pending Reviews
+     */
+    public $pendingReviews;
+
     // Public Methods
     // =========================================================================
 

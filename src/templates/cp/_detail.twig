@@ -15,12 +15,18 @@
     { label: entry.title, url: url('reviews/entries/' ~ entry.id) },
 ] %}
 
-{% set statusOptions = [
-	{label: 'Approved', value: 'approved'},
-	{label: 'Pending', value: 'pending'},
-	{label: 'Spam', value: 'spam'},
-	{label: 'Trashed', value: 'trashed'},
-] %}
+{% set statusOptionsArr = craft.reviews.getStatusOptions() %}
+{% set statusOptions = [] %}
+
+
+{% for option in statusOptionsArr %}
+	{% set optionItem = {
+		label: option|capitalize,
+		value: option
+	} %}
+
+	{% set statusOptions = statusOptions|merge([optionItem]) %}
+{% endfor %}
 
 {% set statusLabel = "<span class='status " ~ review.status ~ "'></span>Status" %}
 

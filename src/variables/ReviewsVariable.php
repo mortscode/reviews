@@ -99,6 +99,16 @@ class ReviewsVariable
     {
         return Reviews::$plugin->reviewsService->getEntryRatings($ratingId);
     }
+    
+    /**
+     * getStatusOptions
+     *
+     * @return array
+     */
+    public function getStatusOptions()
+    {
+        return Reviews::$plugin->reviewsService->getStatusOptions();
+    }
 
     /**
      * getStatusValues

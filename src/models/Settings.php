@@ -41,6 +41,13 @@ class Settings extends Model
      * @var string
      */
     public $defaultStatus = ReviewStatus::Pending;
+    
+    /**
+     * which sections are able to be reviewed
+     *
+     * @var array
+     */
+    public $reviewsSections;
 
     // Public Methods
     // =========================================================================

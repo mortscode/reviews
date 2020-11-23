@@ -12,6 +12,22 @@
 
 {% set title = entry.title %}
 
+{% set resultsDataProvider = create({
+	'class': 'yii\\data\\ArrayDataProvider',
+	'allModels':reviews,
+	'pagination': {'pageSize': 10}
+}) %}
+{# adjust pageSize to the expected number of items per page #}
+{% set results = resultsDataProvider.getModels() %}
+{% set currentPage = resultsDataProvider.getPagination().getPage() + 1 %}
+{% set pageCount = resultsDataProvider.getPagination().getPageCount() %}
+{% if currentPage > 1 %}
+	{% set prevPage = currentPage - 1 %}
+{% endif %}
+{% if currentPage < pageCount %}
+	{% set nextPage = currentPage + 1 %}
+{% endif %}
+
 {% block content %}
 	<table class="data fullwidth">
 		<thead>
@@ -24,7 +40,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for review in reviews %}
+			{% for review in results %}
 				<tr>
 					{# name #}
 					<td>
@@ -53,4 +69,11 @@
 			{% endfor %}
 		</tbody>
 	</table>
+
+	{% if prevPage is defined %}
+		<a href="{{ url(craft.request.absoluteUrl, {'page': prevPage}) }}" class="btn">Previous Page</a>
+	{% endif %}
+	{% if nextPage is defined %}
+		<a href="{{ url(craft.request.absoluteUrl, {'page': nextPage}) }}" class="btn">Next Page</a>
+	{% endif %}
 {% endblock %}

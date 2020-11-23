@@ -10,8 +10,12 @@
 
 namespace mortscode\reviews;
 
+use craft\base\Element;
+use craft\elements\Entry;
+use craft\events\DefineBehaviorsEvent;
 use mortscode\reviews\services\ReviewsService as ReviewsServiceService;
 use mortscode\reviews\variables\ReviewsVariable;
+use mortscode\reviews\behaviors\ReviewsBehavior;
 use mortscode\reviews\models\Settings;
 use mortscode\reviews\widgets\ReviewsWidget as ReviewsWidgetWidget;
 
@@ -144,6 +148,24 @@ class Reviews extends Plugin
                 $variable->set('reviews', ReviewsVariable::class);
             }
         );
+
+        // Join ratings into entries
+        // NOT IN USE
+//         Event::on(
+//             Element::class,
+//             Element::EVENT_DEFINE_BEHAVIORS,
+//             function(DefineBehaviorsEvent $event) {
+//                 $element = $event->sender;
+//
+//                 if ($element instanceof Entry) {
+//                     $sectionHandle = $element->section->handle;
+//                     $reviewsSections = $this->settings->reviewsSections;
+//                     if (in_array($sectionHandle, $reviewsSections, true)) {
+//                        $event->behaviors['reviews'] = ReviewsBehavior::class;
+//                     }
+//                 }
+//             }
+//         );
 
         // Do something after we're installed
         Event::on(

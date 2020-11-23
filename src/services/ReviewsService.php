@@ -14,11 +14,14 @@ use mortscode\reviews\Reviews;
 use mortscode\reviews\models\ReviewModel;
 use mortscode\reviews\models\ReviewedEntryModel;
 use mortscode\reviews\records\ReviewsRecord;
+use mortscode\reviews\enums\ReviewStatus;
 
 use Craft;
 use craft\base\Component;
 use craft\elements\db\EntryQuery;
+use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
+use craft\events\CancelableEvent;
 
 /**
  * ReviewsService Service
@@ -32,6 +35,9 @@ use craft\elements\Entry;
  * @author    Scot Mortimer
  * @package   Reviews
  * @since     1.0.0
+ *
+ * @property-read array $statusOptions
+ * @property-read EntryQuery $reviewedEntries
  */
 class ReviewsService extends Component
 {
@@ -45,6 +51,23 @@ class ReviewsService extends Component
      */
     public function getReviewedEntries(): EntryQuery
     {
+//        $entryQuery = Entry::find()
+//            ->select([
+//                ''
+//            ])
+//            ->asArray();
+//
+//        $entryQuery->on(ElementQuery::EVENT_BEFORE_PREPARE, function(CancelableEvent $event) {
+//            /**
+//             * @var ElementQuery $query
+//             */
+//            $query = $event->sender;
+//            $query->addSelect('rating');
+//            $query->innerJoin(ReviewsRecord::tableName(), 'entryId = elements.id');
+//        });
+//
+//        return $entryQuery;
+
         // get all entries that have reviews
         $reviewedEntriesRecords = ReviewsRecord::find()
             ->orderBy('dateUpdated desc')
@@ -69,7 +92,7 @@ class ReviewsService extends Component
     /**
      * getEntryReviews
      *
-     * @param  mixed $entryId
+     * @param mixed $entryId
      * @return array
      */
     public function getEntryReviews($entryId)
@@ -81,8 +104,7 @@ class ReviewsService extends Component
 
         $reviewModels = [];
 
-        foreach ($entryReviews as $entryReviewRecord)
-        {
+        foreach ($entryReviews as $entryReviewRecord) {
             $reviewModel = new ReviewModel();
             $reviewModel->setAttributes($entryReviewRecord->getAttributes(), false);
 
@@ -91,12 +113,12 @@ class ReviewsService extends Component
 
         return $reviewModels;
     }
-    
+
     /**
      * getEntryRatings
      *
-     * @param  mixed $entryId
-     * @return array [ReviewedEntryModel]
+     * @param mixed $entryId
+     * @return ReviewedEntryModel|void [ReviewedEntryModel]
      */
     public function getEntryRatings($entryId)
     {
@@ -105,16 +127,28 @@ class ReviewsService extends Component
             ->where(['entryId' => $entryId])
             ->all();
 
+        // Craft::dd(end($entryReviewRecords));
+
         // vars for total ratings
         $totalRatings = 0;
         $sumRatingsValue = 0;
+        $approvedReviews = 0;
+        $pendingReviews = 0;
 
         // loop over ratings
         foreach ($entryReviewRecords as $review) {
             // if the review has a rating, add to total and value
             if ($review->rating) {
-                $totalRatings += 1;
+                ++$totalRatings;
                 $sumRatingsValue += $review->rating;
+            }
+
+            if ($review->status == ReviewStatus::Pending) {
+                ++$pendingReviews;
+            } else if ($review->status == ReviewStatus::Approved) {
+                ++$approvedReviews;
+            } else {
+                return;
             }
         }
 
@@ -125,14 +159,16 @@ class ReviewsService extends Component
         $entryRatingsData = new ReviewedEntryModel();
         $entryRatingsData->totalRatings = $totalRatings;
         $entryRatingsData->averageRating = round($averageRating, 1);
+        $entryRatingsData->approvedReviews = $approvedReviews;
+        $entryRatingsData->pendingReviews = $pendingReviews;
 
         return $entryRatingsData;
     }
-    
+
     /**
      * getReviewById
      *
-     * @param  mixed $reviewId
+     * @param mixed $reviewId
      * @return ReviewModel
      */
     public function getReviewById($reviewId): ReviewModel
@@ -148,10 +184,23 @@ class ReviewsService extends Component
         return $reviewModel;
     }
 
+    public function getStatusOptions()
+    {
+        $statusOptions = [
+            ReviewStatus::Approved,
+            ReviewStatus::Pending,
+            ReviewStatus::Spam,
+            ReviewStatus::Trashed,
+        ];
+
+        return $statusOptions;
+    }
+
     /**
      * createReviewRecord
      *
-     * @param  mixed $entryId
+     * @param mixed $entryId
+     * @param $attributes
      * @return void
      */
     public function createReviewRecord($entryId, $attributes)
@@ -171,7 +220,8 @@ class ReviewsService extends Component
     /**
      * updateReviewRecord
      *
-     * @param  mixed $entryId
+     * @param $reviewId
+     * @param $attributes
      * @return void
      */
     public function updateReviewRecord($reviewId, $attributes)

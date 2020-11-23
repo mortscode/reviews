@@ -31,14 +31,9 @@
 {# Get a URL to an image in our AssetBundle #}
 {% set iconUrl = view.getAssetManager().getPublishedUrl('@mortscode/reviews/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
 
-{# Content that should appear in the page header#}
-{% set extraPageHeaderHtml %}
-    <div class="buttons">
-        <a href="{{ pluginCpUrl }}" class="btn submit add icon">{{ "Click Me!"|t('reviews') }}</a>
-    </div>
-{% endset %}
-
-{% set entries = craft.reviews.getReviewedEntries.all() %}
+{% set reviewsSections = craft.app.plugins.getPlugin('reviews').settings.reviewsSections %}
+{% set entries = craft.reviews.getReviewedEntries.section(reviewsSections).limit(25) %}
+{% paginate entries as pageInfo, pageEntries %}
 
 {# The content of the CP Section#}
 {% block content %}
@@ -47,14 +42,14 @@
             <tr>
                 <th>Recipe</th>
                 <th>Link</th>
-                <th>Last Updated</th>
                 <th>Average Rating</th>
                 <th>Total Ratings</th>
-                <th></th>
+                <th>Pending Reviews</th>
             </tr>
         </thead>
         <tbody>
-        {% for entry in entries %}
+        {% for entry in pageEntries %}
+{#            {% dd(entry) %}#}
             {% set rating = craft.reviews.getEntryRatings(entry.id) %}
             <tr>
                 <td>
@@ -69,12 +64,13 @@
                     </a>
                 {% endif %}
                 </td>
-                <td>{{ entry.dateUpdated|date }}</td>
                 <td>{{ rating.averageRating }}</td>
                 <td>{{ rating.totalRatings }}</td>
-
+                <td>{{ rating.pendingReviews }}</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    {% if pageInfo.prevUrl %}<a href="{{ pageInfo.prevUrl }}">Previous Page</a>{% endif %}
+    {% if pageInfo.nextUrl %}<a href="{{ pageInfo.nextUrl }}">Next Page</a>{% endif %}
 {% endblock %}
