@@ -41,13 +41,20 @@ class Settings extends Model
      * @var string
      */
     public $defaultStatus = ReviewStatus::Pending;
+
+    /**
+     * Title heading for the entry column in the CP
+     *
+     * @var string
+     */
+    public $mainColumnTitle = "Entry";
     
     /**
      * which sections are able to be reviewed
      *
      * @var array
      */
-    public $reviewsSections;
+    public $reviewsSections = [];
 
     // Public Methods
     // =========================================================================
