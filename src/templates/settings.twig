@@ -24,6 +24,15 @@
 	{label: 'Trashed', value: 'trashed'},
 ] %}
 
+{% set allEntryTypes = craft.sections.allSections %}
+
+{% set entryTypes = [] %}
+
+{% for entryType in allEntryTypes %}
+{#    {% set checked = entryType.handle in settings.reviewsSections %}#}
+    {% set entryTypes = entryTypes|merge([{label: entryType.name, value: entryType.handle}]) %}
+{% endfor %}
+
 {% set statusLabel = "<span class='status " ~ settings.defaultStatus ~ "'></span>Default Status" %}
 
 {{ forms.selectField({
@@ -33,4 +42,19 @@
     options: statusOptions,
     value: settings.defaultStatus,
     first: true
+}) }}
+
+{{ forms.textField({
+    label: 'Main Column Title',
+    id: 'mainColumnTitle',
+    name: 'mainColumnTitle',
+    value: settings.mainColumnTitle,
+}) }}
+
+{{ forms.checkboxSelectField({
+    label: 'Reviewable Sections',
+    id: 'reviewsSections',
+    name: 'reviewsSections',
+    options: entryTypes,
+    values: settings.reviewsSections|default(null),
 }) }}

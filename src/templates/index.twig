@@ -33,6 +33,7 @@
 
 {% set reviewsSections = craft.app.plugins.getPlugin('reviews').settings.reviewsSections %}
 {% set entries = craft.reviews.getReviewedEntries.section(reviewsSections).limit(25) %}
+{% set mainColumnTitle = craft.app.plugins.getPlugin('reviews').settings.mainColumnTitle %}
 {% paginate entries as pageInfo, pageEntries %}
 
 {# The content of the CP Section#}
@@ -40,7 +41,7 @@
     <table class="data fullwidth">
         <thead>
             <tr>
-                <th>Recipe</th>
+                <th>{{ mainColumnTitle }}</th>
                 <th>Link</th>
                 <th>Average Rating</th>
                 <th>Total Ratings</th>
