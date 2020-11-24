@@ -24,12 +24,11 @@
 	{label: 'Trashed', value: 'trashed'},
 ] %}
 
-{% set allEntryTypes = craft.sections.allSections %}
+{% set allEntryTypes = craft.app.sections.allSections %}
 
 {% set entryTypes = [] %}
 
 {% for entryType in allEntryTypes %}
-{#    {% set checked = entryType.handle in settings.reviewsSections %}#}
     {% set entryTypes = entryTypes|merge([{label: entryType.name, value: entryType.handle}]) %}
 {% endfor %}
 
