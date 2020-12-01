@@ -56,15 +56,17 @@ class ReviewsVariable
     {
         return Reviews::$plugin->reviewsService->getReviewedEntries();
     }
-    
+
     /**
      * getEntryReviews
      *
+     * @param int $entryId
+     * @param bool $getAllStatus
      * @return array[ReviewModel]
      */
-    public function getEntryReviews($entryId): array
+    public function getEntryReviews(int $entryId, bool $getAllStatus = false): array
     {
-        return Reviews::$plugin->reviewsService->getEntryReviews($entryId);
+        return Reviews::$plugin->reviewsService->getEntryReviews($entryId, $getAllStatus);
     }
 
     /**

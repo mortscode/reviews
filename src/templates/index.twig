@@ -34,6 +34,7 @@
 {% set reviewsSections = craft.app.plugins.getPlugin('reviews').settings.reviewsSections %}
 {% set entries = craft.reviews.getReviewedEntries.section(reviewsSections).limit(25) %}
 {% set mainColumnTitle = craft.app.plugins.getPlugin('reviews').settings.mainColumnTitle %}
+
 {% paginate entries as pageInfo, pageEntries %}
 
 {# The content of the CP Section#}
@@ -49,8 +50,7 @@
             </tr>
         </thead>
         <tbody>
-        {% for entry in pageEntries %}
-{#            {% dd(entry) %}#}
+        {% for entry in entries.all %}
             {% set rating = craft.reviews.getEntryRatings(entry.id) %}
             <tr>
                 <td>

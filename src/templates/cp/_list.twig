@@ -4,7 +4,7 @@
 {% do view.registerAssetBundle("mortscode\\reviews\\assetbundles\\reviews\\ReviewsAsset") %}
 
 {% set entry = craft.entries.id(entryId).one() %}
-{% set reviews = craft.reviews.getEntryReviews(entryId) %}
+{% set reviews = craft.reviews.getEntryReviews(entryId, true) %}
 
 {% set crumbs = [
     { label: 'Reviews', url: url('reviews') }
