@@ -92,15 +92,22 @@ class ReviewsService extends Component
     /**
      * getEntryReviews
      *
-     * @param mixed $entryId
+     * @param int $entryId
+     * @param bool $getAllStatus
      * @return array
      */
-    public function getEntryReviews($entryId)
+    public function getEntryReviews(int $entryId, bool $getAllStatus): array
     {
         // get all records from DB related to entry
-        $entryReviews = ReviewsRecord::find()
-            ->where(['entryId' => $entryId])
-            ->all();
+        if ($getAllStatus) {
+            $entryReviews = ReviewsRecord::find()
+                ->where(['entryId' => $entryId])
+                ->all();
+        } else {
+            $entryReviews = ReviewsRecord::find()
+                ->where(['entryId' => $entryId, 'status' => ReviewStatus::Approved])
+                ->all();
+        }
 
         $reviewModels = [];
 
