@@ -122,14 +122,25 @@ class ReviewModel extends Model
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             // the name, email attributes are required
-            [['name', 'email'], 'required'],
+            [
+                ['name', 'email'],
+                'required',
+                'message' => '{attribute} is required'
+            ],
 
             // the email attribute should be a valid email address
             ['email', 'email'],
+
+            // the comment field should not have links in it
+            ['comment', 'match',
+                'pattern' => '%^((https?://)|(www\.))([a-z0-9-].?)+(:[0-9]+)?(/.*)?$%i',
+                'not' => true,
+                'message' => 'Your comment cannot contain urls or links.'
+            ],
         ];
     }
 
