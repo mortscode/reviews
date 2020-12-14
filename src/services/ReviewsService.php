@@ -51,23 +51,6 @@ class ReviewsService extends Component
      */
     public function getReviewedEntries(): EntryQuery
     {
-//        $entryQuery = Entry::find()
-//            ->select([
-//                ''
-//            ])
-//            ->asArray();
-//
-//        $entryQuery->on(ElementQuery::EVENT_BEFORE_PREPARE, function(CancelableEvent $event) {
-//            /**
-//             * @var ElementQuery $query
-//             */
-//            $query = $event->sender;
-//            $query->addSelect('rating');
-//            $query->innerJoin(ReviewsRecord::tableName(), 'entryId = elements.id');
-//        });
-//
-//        return $entryQuery;
-
         // get all entries that have reviews
         $reviewedEntriesRecords = ReviewsRecord::find()
             ->orderBy('dateUpdated desc')
@@ -191,37 +174,89 @@ class ReviewsService extends Component
         return $reviewModel;
     }
 
-    public function getStatusOptions()
+    /**
+     * @return array
+     */
+    public function getStatusOptions(): array
     {
-        $statusOptions = [
+        return [
             ReviewStatus::Approved,
             ReviewStatus::Pending,
             ReviewStatus::Spam,
             ReviewStatus::Trashed,
         ];
+    }
 
-        return $statusOptions;
+    /**
+     * @param int $reviewId
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function deleteReview(int $reviewId) {
+        // get record from DB
+        $reviewRecord = ReviewsRecord::find()
+            ->where(['id' => $reviewId])
+            ->one();
+
+        // if record exists then delete
+        if ($reviewRecord) {
+            // delete record from DB
+            $reviewRecord->delete();
+        }
+
+        // log reset
+        Craft::warning(Craft::t('reviews', 'Review with review ID {reviewId} reset by {username}', [
+            'reviewId' => $reviewId,
+            'username' => Craft::$app->getUser()->getIdentity()->username,
+        ]), 'Reviews');
+    }
+
+    /**
+     * Cleanup Entry Reviews
+     * Deletes all trashed reviews for this entry
+     *
+     * @param int $entryId
+     */
+    public function cleanupEntry(int $entryId) {
+        // get record from DB
+        $trashedReviewsRecords = ReviewsRecord::find()
+            ->where(['entryId' => $entryId, 'status' => ReviewStatus::Trashed])
+            ->all();
+
+        // if record exists then delete
+        if ($trashedReviewsRecords) {
+
+            // delete records from DB
+            foreach ($trashedReviewsRecords as $record) {
+                $record->delete();
+            }
+        }
+
+        // log reset
+        Craft::warning(Craft::t('reviews', 'Trashed reviews on Entry ID {entryId} deleted up by {username}', [
+            'entryId' => $entryId,
+            'username' => Craft::$app->getUser()->getIdentity()->username,
+        ]), 'Reviews');
     }
 
     /**
      * createReviewRecord
      *
-     * @param mixed $entryId
-     * @param $attributes
-     * @return void
+     * @param $review ReviewModel
+     * @return bool
      */
-    public function createReviewRecord($entryId, $attributes)
+    public function createReviewRecord(ReviewModel $review)
     {
         $reviewsRecord = new ReviewsRecord;
-        $reviewsRecord->entryId = $entryId;
-        $reviewsRecord->name = $attributes['name'];
-        $reviewsRecord->email = $attributes['email'];
-        $reviewsRecord->rating = $attributes['rating'];
-        $reviewsRecord->comment = $attributes['comment'];
-        $reviewsRecord->status = $attributes['status'];
+        $reviewsRecord->entryId = $review->entryId;
+        $reviewsRecord->name = $review->name;
+        $reviewsRecord->email = $review->email;
+        $reviewsRecord->rating = $review->rating;
+        $reviewsRecord->comment = $review->comment;
+        $reviewsRecord->status = $review->status;
 
         // save record in DB
-        $reviewsRecord->save();
+        return $reviewsRecord->save();
     }
 
     /**

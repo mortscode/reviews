@@ -10,10 +10,15 @@
 
 namespace mortscode\reviews\controllers;
 
+use craft\errors\MissingComponentException;
+use mortscode\reviews\models\ReviewModel;
 use mortscode\reviews\Reviews;
 
 use Craft;
 use craft\web\Controller;
+use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
+use yii\web\Response;
 
 /**
  * Reviews Controller
@@ -46,7 +51,7 @@ class ReviewsController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['index', 'do-something'];
+    protected $allowAnonymous = ['save'];
 
     // Public Methods
     // =========================================================================
@@ -55,36 +60,57 @@ class ReviewsController extends Controller
      * Save Action
      *
      * @return mixed
+     * @throws BadRequestHttpException|MissingComponentException
      */
     public function actionSave()
     {
         $this->requirePostRequest();
+        $review = $this->_setReviewFromPost();
+        $isValid = $review->validate();
 
-        $request = Craft::$app->getRequest();
-        $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
-        $settings = Reviews::$plugin->getSettings();
+        if ($isValid) {
+            // review is valid, let's create the record
+            $createReview = Reviews::$plugin->reviews->createReviewRecord($review);
 
-        $attributes[] = [
-            'name' => Craft::$app->getRequest()->getRequiredParam('name'),
-            'email' => Craft::$app->getRequest()->getRequiredParam('email'),
-            'rating' => Craft::$app->getRequest()->getParam('rating'),
-            'comment' => Craft::$app->getRequest()->getParam('comment'),
-            'status' => $settings->defaultStatus,
-            'response' => NULL,
-        ];
+            // attempt to create review
+            if (!$createReview) {
+                // set error if save isn't successful
+                Craft::$app->getSession()->setError('Your review could not be saved. Please try again.');
+                // pass review back to template
+                Craft::$app->getUrlManager()->setRouteParams([
+                    'review' => $review
+                ]);
 
-        Reviews::$plugin->reviews->createReviewRecord($entryId, $attributes[0]);
+                return null;
+            }
+        } else {
+            // review is not valid
+            Craft::$app->getSession()->setError('Please check for errors.');
+            // pass review back to template
+            Craft::$app->getUrlManager()->setRouteParams([
+                'review' => $review
+            ]);
 
+            return null;
+        }
+
+        // Ok, definitely valid + saved!
         return $this->redirectToPostedUrl();
     }
 
+    /**
+     * Update Action
+     *
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
     public function actionUpdate()
     {
         $this->requirePostRequest();
         
         $request = Craft::$app->getRequest();
-        $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
-        $reviewId = Craft::$app->getRequest()->getRequiredParam('reviewId');
+        $entryId = $request->getRequiredParam('entryId');
+        $reviewId = $request->getRequiredParam('reviewId');
 
         $attributes[] = [
             'response' => Craft::$app->getRequest()->getParam('response') ?? '',
@@ -93,6 +119,76 @@ class ReviewsController extends Controller
 
         Reviews::$plugin->reviews->updateReviewRecord($reviewId, $attributes[0]);
 
+        Craft::$app->getSession()->setNotice('Review updated');
+
         return $this->redirect('reviews/entries/' . $entryId);
+    }
+
+    /**
+     * Delete Review
+     *
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws MissingComponentException
+     */
+    public function actionDelete()
+    {
+        $request = Craft::$app->getRequest();
+        $entryId = $request->getRequiredParam('entryId');
+        $reviewId = $request->getRequiredParam('reviewId');
+
+        Reviews::$plugin->reviews->deleteReview($reviewId);
+
+        Craft::$app->getSession()->setNotice(Craft::t('reviews', 'Review reset.'));
+
+        return $this->redirect('reviews/entries/' . $entryId);
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     * @throws MissingComponentException
+     */
+    public function actionCleanup(): Response
+    {
+        $request = Craft::$app->getRequest();
+        $entryId = $request->getRequiredParam('entryId');
+
+        Reviews::$plugin->reviews->cleanupEntry($entryId);
+
+        Craft::$app->getSession()->setNotice(Craft::t('reviews', 'Entry Id {entryId} cleaned up.', [
+            'entryId' => $entryId
+        ]));
+
+        return $this->redirect('reviews/entries/' . $entryId);
+    }
+
+    // PRIVATE METHODS
+    // =========================
+
+    /**
+     * @return ReviewModel
+     * @throws BadRequestHttpException
+     */
+    private function _setReviewFromPost(): ReviewModel
+    {
+        $request = Craft::$app->getRequest();
+        $settings = Reviews::$plugin->getSettings();
+
+        $review = new ReviewModel();
+
+        // get IP and User Agent
+        $review->ipAddress = $request->getUserIP();
+        $review->userAgent = $request->getUserAgent();
+
+        // get form fields
+        $review->entryId = $request->getRequiredParam('entryId', $review->entryId);
+        $review->name = $request->getRequiredParam('name', $review->name);
+        $review->email = $request->getRequiredParam('email', $review->email);
+        $review->rating = $request->getParam('rating', $review->rating);
+        $review->comment = $request->getParam('comment', $review->comment);
+        $review->status = $settings->defaultStatus;
+
+        return $review;
     }
 }
