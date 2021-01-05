@@ -48,6 +48,7 @@
     id: 'mainColumnTitle',
     name: 'mainColumnTitle',
     value: settings.mainColumnTitle,
+    size: 50
 }) }}
 
 {{ forms.checkboxSelectField({
@@ -56,4 +57,20 @@
     name: 'reviewsSections',
     options: entryTypes,
     values: settings.reviewsSections|default(null),
+}) }}
+
+{{ forms.textField({
+    label: 'ReCaptcha Site Key',
+    id: 'recaptchaSiteKey',
+    name: 'recaptchaSiteKey',
+    value: settings.recaptchaSiteKey,
+    size: 50
+}) }}
+
+{{ forms.textField({
+    label: 'ReCaptcha Secret Key',
+    id: 'recaptchaSecretKey',
+    name: 'recaptchaSecretKey',
+    value: settings.recaptchaSecretKey,
+    size: 50
 }) }}

@@ -48,6 +48,20 @@ class Settings extends Model
      * @var string
      */
     public $mainColumnTitle = "Entry";
+
+    /**
+     * ReCapcha Site Key
+     *
+     * @var string
+     */
+    public $recaptchaSiteKey = null;
+
+    /**
+     * ReCapcha Secret Key
+     *
+     * @var string
+     */
+    public $recaptchaSecretKey = null;
     
     /**
      * which sections are able to be reviewed

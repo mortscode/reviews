@@ -10,6 +10,7 @@
 
 namespace mortscode\reviews\services;
 
+use mortscode\reviews\models\RecaptchaModel;
 use mortscode\reviews\Reviews;
 use mortscode\reviews\models\ReviewModel;
 use mortscode\reviews\models\ReviewedEntryModel;
@@ -185,6 +186,19 @@ class ReviewsService extends Component
             ReviewStatus::Spam,
             ReviewStatus::Trashed,
         ];
+    }
+
+    /**
+     * @return RecaptchaModel
+     */
+    public function getRecaptchaKey(): RecaptchaModel
+    {
+        $settings = Reviews::$plugin->getSettings();
+
+        $key = new RecaptchaModel();
+        $key->siteKey = $settings->recaptchaSiteKey;
+
+        return $key;
     }
 
     /**
