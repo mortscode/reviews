@@ -10,10 +10,10 @@
 
 namespace mortscode\reviews\variables;
 
+use mortscode\reviews\models\RecaptchaModel;
 use mortscode\reviews\Reviews;
 use mortscode\reviews\models\ReviewModel;
 use mortscode\reviews\models\ReviewedEntryModel;
-use mortscode\reviews\records\ReviewsRecord;
 use mortscode\reviews\enums\ReviewStatus;
 
 
@@ -110,6 +110,16 @@ class ReviewsVariable
     public function getStatusOptions()
     {
         return Reviews::$plugin->reviewsService->getStatusOptions();
+    }
+
+    /**
+     * getReCaptchaKey
+     *
+     * @return string
+     */
+    public function getRecaptchaKey(): RecaptchaModel
+    {
+        return Reviews::$plugin->reviewsService->getRecaptchaKey();
     }
 
     /**

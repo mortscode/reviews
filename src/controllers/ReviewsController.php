@@ -19,6 +19,9 @@ use craft\web\Controller;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
+use yii\captcha\CaptchaAction;
+
+use GuzzleHttp\Client;
 
 /**
  * Reviews Controller
@@ -65,7 +68,18 @@ class ReviewsController extends Controller
     public function actionSave()
     {
         $this->requirePostRequest();
+        
+        $validRecaptcha = $this->_verifyRecaptcha();
+
+        if (!$validRecaptcha) {
+            Craft::dd('ROBOTS!');
+            Craft::$app->getSession()->setError('Sorry, there was a problem. Please try again.');
+
+            return null;
+        }
+
         $review = $this->_setReviewFromPost();
+        
         $isValid = $review->validate();
 
         if ($isValid) {
@@ -163,6 +177,18 @@ class ReviewsController extends Controller
         return $this->redirect('reviews/entries/' . $entryId);
     }
 
+    /**
+     * @return string[][]
+     */
+    public function actionCaptcha(): array
+    {
+        return [
+            'captcha' => [
+                'class' => CaptchaAction::class,
+            ],
+        ];
+    }
+
     // PRIVATE METHODS
     // =========================
 
@@ -173,14 +199,15 @@ class ReviewsController extends Controller
     private function _setReviewFromPost(): ReviewModel
     {
         $request = Craft::$app->getRequest();
+
         $settings = Reviews::$plugin->getSettings();
-
+        
         $review = new ReviewModel();
-
+        
         // get IP and User Agent
         $review->ipAddress = $request->getUserIP();
         $review->userAgent = $request->getUserAgent();
-
+        
         // get form fields
         $review->entryId = $request->getRequiredParam('entryId', $review->entryId);
         $review->name = $request->getRequiredParam('name', $review->name);
@@ -190,5 +217,41 @@ class ReviewsController extends Controller
         $review->status = $settings->defaultStatus;
 
         return $review;
+    }
+    
+    /**
+     * _verifyRecaptcha
+     *
+     * @return bool
+     */
+    private function _verifyRecaptcha()
+    {
+        $settings = Reviews::$plugin->getSettings();
+
+        // if user has entered recaptcha keys, verify request
+        if ($settings->recaptchaSecretKey) {
+            $request = Craft::$app->getRequest();
+            $recaptchaToken = $request->getParam('token');
+            
+            $url = 'https://www.google.com/recaptcha/api/siteverify';
+
+            $client = new Client();
+
+            $response = $client->post($url, [
+                'form_params' => [
+                    'secret'   => $settings->recaptchaSecretKey,
+                    'response' => $recaptchaToken,
+                    'remoteip' => $request->getUserIP(),
+                ],
+            ]);
+
+            $result = json_decode((string)$response->getBody(), true);
+
+            return $result['success'];
+        } else {
+            return true;
+        }
+        
+        
     }
 }
