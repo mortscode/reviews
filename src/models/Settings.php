@@ -64,6 +64,13 @@ class Settings extends Model
     public $recaptchaSecretKey = null;
     
     /**
+     * Discuss User Handle
+     *
+     * @var string
+     */
+    public $disqusUserHandle = null;
+    
+    /**
      * which sections are able to be reviewed
      *
      * @var array
