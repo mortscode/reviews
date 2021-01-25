@@ -32,6 +32,7 @@
     {% set entryTypes = entryTypes|merge([{label: entryType.name, value: entryType.handle}]) %}
 {% endfor %}
 
+
 {% set statusLabel = "<span class='status " ~ settings.defaultStatus ~ "'></span>Default Status" %}
 
 {{ forms.selectField({
@@ -74,3 +75,18 @@
     value: settings.recaptchaSecretKey,
     size: 50
 }) }}
+
+<hr/>
+<h2>Disqus Import</h2>
+<p>Import an XML file from Disqus into existing entries. Reviews will only be imported into the "Reviewable Sections" selected above.</p>
+
+{{ forms.textField({
+    label: 'Disqus User Handle',
+    instructions: 'Add your Disqus user handle (shortname) to import Responses',
+    id: 'disqusUserHandle',
+    name: 'disqusUserHandle',
+    value: settings.disqusUserHandle,
+    size: 50
+}) }}
+
+<a class="btn add icon" href="{{ url('reviews/import/xml') }}">Import XML</a>

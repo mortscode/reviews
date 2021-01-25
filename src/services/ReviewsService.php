@@ -12,6 +12,7 @@ namespace mortscode\reviews\services;
 
 use mortscode\reviews\models\RecaptchaModel;
 use mortscode\reviews\Reviews;
+use mortscode\reviews\models\ImportedReviewModel;
 use mortscode\reviews\models\ReviewModel;
 use mortscode\reviews\models\ReviewedEntryModel;
 use mortscode\reviews\records\ReviewsRecord;
@@ -20,9 +21,7 @@ use mortscode\reviews\enums\ReviewStatus;
 use Craft;
 use craft\base\Component;
 use craft\elements\db\EntryQuery;
-use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
-use craft\events\CancelableEvent;
 
 /**
  * ReviewsService Service
@@ -118,13 +117,12 @@ class ReviewsService extends Component
             ->where(['entryId' => $entryId])
             ->all();
 
-        // Craft::dd(end($entryReviewRecords));
-
         // vars for total ratings
         $totalRatings = 0;
-        $sumRatingsValue = 0;
+        $sumRatingsValue = null;
         $approvedReviews = 0;
         $pendingReviews = 0;
+        $averageRating = null;
 
         // loop over ratings
         foreach ($entryReviewRecords as $review) {
@@ -144,12 +142,15 @@ class ReviewsService extends Component
         }
 
         // calculate average rating
-        $averageRating = $sumRatingsValue / $totalRatings;
+        if ($sumRatingsValue) {
+            $averageRating = $sumRatingsValue / $totalRatings;
+            $averageRating = round($averageRating, 1);
+        }
 
         // create data object for ratings data
         $entryRatingsData = new ReviewedEntryModel();
         $entryRatingsData->totalRatings = $totalRatings;
-        $entryRatingsData->averageRating = round($averageRating, 1);
+        $entryRatingsData->averageRating = $averageRating ?? 'none';
         $entryRatingsData->approvedReviews = $approvedReviews;
         $entryRatingsData->pendingReviews = $pendingReviews;
 
@@ -268,6 +269,28 @@ class ReviewsService extends Component
         $reviewsRecord->rating = $review->rating;
         $reviewsRecord->comment = $review->comment;
         $reviewsRecord->status = $review->status;
+        $reviewsRecord->response = $review->response;
+
+        // save record in DB
+        return $reviewsRecord->save();
+    }
+    
+    /**
+     * createReviewRecord
+     *
+     * @param $review ReviewModel
+     * @return bool
+     */
+    public function createImportedReviewRecord(ImportedReviewModel $review)
+    {
+        $reviewsRecord = new ReviewsRecord;
+        $reviewsRecord->entryId = $review->entryId;
+        $reviewsRecord->name = $review->name;
+        $reviewsRecord->email = $review->email;
+        $reviewsRecord->rating = $review->rating;
+        $reviewsRecord->comment = $review->comment;
+        $reviewsRecord->status = $review->status;
+        $reviewsRecord->response = $review->response;
 
         // save record in DB
         return $reviewsRecord->save();

@@ -135,8 +135,6 @@ Render reviews in your templates like so:
 </script>
 ```
 
-5.
-
 ## Reviews Roadmap
 
 Some things to do, and ideas for potential features:
