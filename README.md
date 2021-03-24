@@ -96,7 +96,7 @@ Render reviews in your templates like so:
 
 ### ReCaptcha
 
-1. Register your site with Google ReCaptcha [here]('https://www.google.com/recaptcha/admin/create').
+1. Register your site with Google ReCaptcha [here](https://www.google.com/recaptcha/admin/create).
 2. Add your new site key and secret key to the `Settings > Reviews` page in the Craft CP
 3. Add the JS script to pages using the Reviews plugin. You can grab the key from the settings page with the `craft.reviews.getRecaptchaKey` helper.
 
