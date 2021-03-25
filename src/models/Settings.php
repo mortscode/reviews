@@ -81,6 +81,22 @@ class Settings extends Model
     // =========================================================================
 
     /**
+     * @return string the parsed secret key (e.g. 'XXXXXXXXXXX')
+     */
+    public function getRecaptchaKey(): string
+    {
+        return Craft::parseEnv($this->recaptchaSiteKey);
+    }
+
+    /**
+     * @return string the parsed secret key (e.g. 'XXXXXXXXXXX')
+     */
+    public function getRecaptchaSecret(): string
+    {
+        return Craft::parseEnv($this->recaptchaSecretKey);
+    }
+
+    /**
      * Returns the validation rules for attributes.
      *
      * Validation rules are used by [[validate()]] to check if attribute values are valid.
