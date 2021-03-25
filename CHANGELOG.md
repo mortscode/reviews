@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.7 - 2021-03-25
+
+### Fixed
+
+-   Moved recaptcha env var template function into services
+-   Wrapped env var in `parseEnv()` method
+
 ## 1.0.6 - 2021-03-25
 
 ### Added

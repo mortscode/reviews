@@ -190,16 +190,13 @@ class ReviewsService extends Component
     }
 
     /**
-     * @return RecaptchaModel
+     * @return String
      */
-    public function getRecaptchaKey(): RecaptchaModel
+    public function getRecaptchaKey(): string
     {
         $settings = Reviews::$plugin->getSettings();
 
-        $key = new RecaptchaModel();
-        $key->siteKey = $settings->recaptchaSiteKey;
-
-        return $key;
+        return Craft::parseEnv($settings->recaptchaSiteKey);
     }
 
     /**
