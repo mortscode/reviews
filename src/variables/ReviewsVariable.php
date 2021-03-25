@@ -117,7 +117,7 @@ class ReviewsVariable
      *
      * @return string
      */
-    public function getRecaptchaKey(): RecaptchaModel
+    public function getRecaptchaKey(): string
     {
         return Reviews::$plugin->reviewsService->getRecaptchaKey();
     }
