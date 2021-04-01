@@ -490,22 +490,27 @@ class ReviewsController extends Controller
 
         // if user has entered recaptcha keys, verify request
         if ($settings->recaptchaSecretKey) {
+
+            $recaptchaSecret = Craft::parseEnv($settings->recaptchaSecretKey);
+
             $request = Craft::$app->getRequest();
             $recaptchaToken = $request->getParam('token');
-            
+
             $url = 'https://www.google.com/recaptcha/api/siteverify';
 
             $client = new Client();
 
             $response = $client->post($url, [
                 'form_params' => [
-                    'secret'   => $settings->recaptchaSecretKey,
+                    'secret'   => $recaptchaSecret,
                     'response' => $recaptchaToken,
                     'remoteip' => $request->getUserIP(),
                 ],
             ]);
 
             $result = json_decode((string)$response->getBody(), true);
+
+            Craft::dd($result);
 
             return $result['success'];
         } else {
