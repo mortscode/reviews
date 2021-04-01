@@ -510,8 +510,6 @@ class ReviewsController extends Controller
 
             $result = json_decode((string)$response->getBody(), true);
 
-            Craft::dd($result);
-
             return $result['success'];
         } else {
             return true;
