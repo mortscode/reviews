@@ -50,9 +50,9 @@ class ReviewsVariable
     /**
      * getReviewedEntries
      *
-     * @return array[entryIds]
+     * @return \craft\elements\db\EntryQuery[entryIds]
      */
-    public function getReviewedEntries()
+    public function getReviewedEntries(): \craft\elements\db\EntryQuery
     {
         return Reviews::$plugin->reviewsService->getReviewedEntries();
     }
@@ -86,7 +86,7 @@ class ReviewsVariable
      * @param  mixed $entryId
      * @return ReviewedEntryModel
      */
-    public function getEntryRatings($entryId)
+    public function getEntryRatings($entryId): ReviewedEntryModel
     {
         return Reviews::$plugin->reviewsService->getEntryRatings($entryId);
     }
@@ -107,7 +107,7 @@ class ReviewsVariable
      *
      * @return array
      */
-    public function getStatusOptions()
+    public function getStatusOptions(): array
     {
         return Reviews::$plugin->reviewsService->getStatusOptions();
     }
@@ -129,13 +129,11 @@ class ReviewsVariable
      */
     public function getStatusValues(): array
     {
-        $statusValues = [
+        return [
             ReviewStatus::Approved => ucfirst(ReviewStatus::Approved),
             ReviewStatus::Pending => ucfirst(ReviewStatus::Pending),
             ReviewStatus::Spam => ucfirst(ReviewStatus::Spam),
             ReviewStatus::Trashed => ucfirst(ReviewStatus::Trashed),
         ];
-
-        return $statusValues;
     }
 }

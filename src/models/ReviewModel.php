@@ -71,7 +71,7 @@ class ReviewModel extends Model
      *
      * @var int
      */
-    public $rating = 5;
+    public $rating = null;
     
     /**
      * comment

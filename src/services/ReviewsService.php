@@ -37,6 +37,7 @@ use craft\elements\Entry;
  * @since     1.0.0
  *
  * @property-read array $statusOptions
+ * @property-read String $recaptchaKey
  * @property-read EntryQuery $reviewedEntries
  */
 class ReviewsService extends Component
@@ -47,13 +48,15 @@ class ReviewsService extends Component
     /**
      * getReviewedEntries
      *
+     * Get all the entries that have reviews
+     *
      * @return EntryQuery
      */
     public function getReviewedEntries(): EntryQuery
     {
         // get all entries that have reviews
         $reviewedEntriesRecords = ReviewsRecord::find()
-            ->orderBy('dateUpdated desc')
+            ->orderBy('dateUpdated DESC')
             ->all();
 
         // create empty array for Entry Ids
@@ -75,6 +78,8 @@ class ReviewsService extends Component
     /**
      * getEntryReviews
      *
+     * Get all the reviews on an entry by its ID
+     *
      * @param int $entryId
      * @param bool $getAllStatus
      * @return array
@@ -89,6 +94,7 @@ class ReviewsService extends Component
         } else {
             $entryReviews = ReviewsRecord::find()
                 ->where(['entryId' => $entryId, 'status' => ReviewStatus::Approved])
+                ->orderBy('dateUpdated')
                 ->all();
         }
 
@@ -150,7 +156,7 @@ class ReviewsService extends Component
         // create data object for ratings data
         $entryRatingsData = new ReviewedEntryModel();
         $entryRatingsData->totalRatings = $totalRatings;
-        $entryRatingsData->averageRating = $averageRating ?? 'none';
+        $entryRatingsData->averageRating = $averageRating;
         $entryRatingsData->approvedReviews = $approvedReviews;
         $entryRatingsData->pendingReviews = $pendingReviews;
 
@@ -228,6 +234,8 @@ class ReviewsService extends Component
      * Deletes all trashed reviews for this entry
      *
      * @param int $entryId
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function cleanupEntry(int $entryId) {
         // get record from DB
@@ -254,31 +262,10 @@ class ReviewsService extends Component
     /**
      * createReviewRecord
      *
-     * @param $review ReviewModel
+     * @param $review ReviewModel|ImportedReviewModel
      * @return bool
      */
-    public function createReviewRecord(ReviewModel $review)
-    {
-        $reviewsRecord = new ReviewsRecord;
-        $reviewsRecord->entryId = $review->entryId;
-        $reviewsRecord->name = $review->name;
-        $reviewsRecord->email = $review->email;
-        $reviewsRecord->rating = $review->rating;
-        $reviewsRecord->comment = $review->comment;
-        $reviewsRecord->status = $review->status;
-        $reviewsRecord->response = $review->response;
-
-        // save record in DB
-        return $reviewsRecord->save();
-    }
-    
-    /**
-     * createReviewRecord
-     *
-     * @param $review ReviewModel
-     * @return bool
-     */
-    public function createImportedReviewRecord(ImportedReviewModel $review)
+    public function createReviewRecord($review): bool
     {
         $reviewsRecord = new ReviewsRecord;
         $reviewsRecord->entryId = $review->entryId;

@@ -21,7 +21,6 @@ use Craft;
 use craft\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
-use yii\captcha\CaptchaAction;
 
 use GuzzleHttp\Client;
 use mortscode\reviews\models\ImportedReviewModel;
@@ -66,13 +65,16 @@ class ReviewsController extends Controller
     /**
      * Save Action
      *
+     * Save a review to the database
+     *
      * @return mixed
      * @throws BadRequestHttpException|MissingComponentException
      */
     public function actionSave()
     {
         $this->requirePostRequest();
-        
+
+        // first, validate the Recaptcha success
         $validRecaptcha = $this->_verifyRecaptcha();
 
         if (!$validRecaptcha) {
@@ -82,8 +84,9 @@ class ReviewsController extends Controller
             return null;
         }
 
+        // Create a new ReviewModel model
         $review = $this->_setReviewFromPost();
-        
+        // Validate the new ReviewModel model
         $isValid = $review->validate();
 
         if ($isValid) {
@@ -119,10 +122,13 @@ class ReviewsController extends Controller
     /**
      * Update Action
      *
-     * @return mixed
-     * @throws BadRequestHttpException
+     * Update the review status
+     * add/edit a review response
+     *
+     * @return Response
+     * @throws BadRequestHttpException|MissingComponentException
      */
-    public function actionUpdate()
+    public function actionUpdate(): Response
     {
         $this->requirePostRequest();
         
@@ -145,11 +151,13 @@ class ReviewsController extends Controller
     /**
      * Delete Review
      *
-     * @return mixed
+     * Delete a review using its $reviewId
+     *
+     * @return Response
      * @throws BadRequestHttpException
      * @throws MissingComponentException
      */
-    public function actionDelete()
+    public function actionDelete(): Response
     {
         $request = Craft::$app->getRequest();
         $entryId = $request->getRequiredParam('entryId');
@@ -163,6 +171,7 @@ class ReviewsController extends Controller
     }
 
     /**
+     * Delete all of an entry's reviews with status of 'delete' or 'spam'
      * @return Response
      * @throws BadRequestHttpException
      * @throws MissingComponentException
@@ -182,17 +191,12 @@ class ReviewsController extends Controller
     }
 
     /**
-     * @return string[][]
+     * Import XML data from Disqus
+     *
+     * @return void|Response
+     * @throws BadRequestHttpException
+     * @throws MissingComponentException
      */
-    public function actionCaptcha(): array
-    {
-        return [
-            'captcha' => [
-                'class' => CaptchaAction::class,
-            ],
-        ];
-    }
-
     public function actionImportXml()
     {
         $user = Craft::$app->getUser()->getIdentity();
@@ -274,7 +278,8 @@ class ReviewsController extends Controller
      * @param  mixed $comments
      * @return array
      */
-    private function _convertComments(array $comments) {
+    private function _convertComments(array $comments): array
+    {
 
         $result = [];
         foreach($comments as $comment) {
@@ -318,7 +323,8 @@ class ReviewsController extends Controller
      * @param  mixed $threads
      * @return array
      */
-    private function _convertThreads(array $threads) {
+    private function _convertThreads(array $threads): array
+    {
       
         $result = [];
         foreach($threads as $thread) {
@@ -366,23 +372,22 @@ class ReviewsController extends Controller
      * @param  mixed $url
      * @return void
      */
-    private function _getSlugFromUrl(string $url)
+    private function _getSlugFromUrl(string $url): string
     {
         $parsedUrl = parse_url($url);
         $slug = $parsedUrl['path'];
         // remove "/" from string
-        $slug = substr($slug, 1);
-
-        return $slug;
+        return substr($slug, 1);
     }
-    
+
     /**
      * _createImportedRecords
      *
-     * @param  mixed $threads
+     * @param mixed $threads
      * @return void
+     * @throws MissingComponentException
      */
-    private function _createImportedRecords(array $threads)
+    private function _createImportedRecords(array $threads): void
     {
         $settings = Reviews::$plugin->getSettings();
 
@@ -414,14 +419,12 @@ class ReviewsController extends Controller
                 $response = [];
 
                 // look for response from admin
-                if($settings->disqusUserHandle) {
-                    if ($comment['children']) {
-                        $children = $comment['children'];
-    
-                        foreach ($children as $child) {
-                            if ($child['disqusUser'] === $settings['disqusUserHandle']) {
-                                $response[] = $child['message'];
-                            }
+                if($settings->disqusUserHandle && $comment['children']) {
+                    $children = $comment['children'];
+
+                    foreach ($children as $child) {
+                        if ($child['disqusUser'] === $settings['disqusUserHandle']) {
+                            $response[] = $child['message'];
                         }
                     }
                 }
@@ -436,7 +439,7 @@ class ReviewsController extends Controller
                 $newReview->status = ReviewStatus::Pending;
                 
                 // review is valid, let's create the record
-                $createReview = Reviews::$plugin->reviews->createImportedReviewRecord($newReview);
+                $createReview = Reviews::$plugin->reviews->createReviewRecord($newReview);
                 
                 if (!$createReview) {
                     // set error if save isn't successful
@@ -445,8 +448,8 @@ class ReviewsController extends Controller
                     Craft::$app->getUrlManager()->setRouteParams([
                         'review' => $newReview
                     ]);
-    
-                    return null;
+
+                    return;
                 }
             }
         }
@@ -478,13 +481,16 @@ class ReviewsController extends Controller
 
         return $review;
     }
-    
+
     /**
      * _verifyRecaptcha
+     * Return the 'success' value back from Recaptcha on post request
+     * If no CP value in the "Recaptcha Secret Key" setting, return true
      *
      * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function _verifyRecaptcha()
+    private function _verifyRecaptcha(): bool
     {
         $settings = Reviews::$plugin->getSettings();
 
@@ -511,8 +517,8 @@ class ReviewsController extends Controller
             $result = json_decode((string)$response->getBody(), true);
 
             return $result['success'];
-        } else {
-            return true;
         }
+
+        return true;
     }
 }
