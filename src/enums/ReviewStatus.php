@@ -11,8 +11,8 @@ namespace mortscode\reviews\enums;
  */
 abstract class ReviewStatus
 {
-    const Approved = 'approved';
-    const Pending = 'pending';
-    const Spam = 'spam';
-    const Trashed = 'trashed';
+    public const Approved = 'approved';
+    public const Pending = 'pending';
+    public const Spam = 'spam';
+    public const Trashed = 'trashed';
 }
