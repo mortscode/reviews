@@ -10,13 +10,11 @@
 
 namespace mortscode\reviews\models;
 
-use mortscode\reviews\Reviews;
-
-use Craft;
+use mortscode\reviews\enums\ReviewType;
 use craft\base\Model;
 
 /**
- * ImportedReviewModel Model
+ * QuestionModel Model
  *
  * Models are containers for data. Just about every time information is passed
  * between services, controllers, and templates in Craft, it’s passed via a model.
@@ -27,7 +25,7 @@ use craft\base\Model;
  * @package   Reviews
  * @since     1.0.0
  */
-class ImportedReviewModel extends Model
+class QuestionModel extends Model
 {
     // Public Properties
     // =========================================================================
@@ -67,30 +65,23 @@ class ImportedReviewModel extends Model
     public $email;
     
     /**
-     * rating
-     *
-     * @var int
-     */
-    public $rating = null;
-    
-    /**
      * comment
      *
-     * @var text
+     * @var string
      */
     public $comment = null;
     
     /**
      * response
      *
-     * @var text
+     * @var string
      */
     public $response = null;
 
     /**
      * status
      *
-     * @var enum
+     * @var string
      */
     public $status = null;
 
@@ -107,6 +98,13 @@ class ImportedReviewModel extends Model
      * @var string
      */
     public $userAgent = null;
+
+    /**
+     * reviewType
+     *
+     * @var string
+     */
+    public $reviewType = ReviewType::Question;
 
 
     // Public Methods
@@ -127,10 +125,13 @@ class ImportedReviewModel extends Model
         return [
             // the name, email attributes are required
             [
-                ['name'],
+                ['name', 'email', 'reviewType'],
                 'required',
                 'message' => '{attribute} is required'
             ],
+
+            // the email attribute should be a valid email address
+            ['email', 'email'],
 
             // the comment field should not have links in it
             ['comment', 'match',

@@ -10,6 +10,7 @@
 
 namespace mortscode\reviews\services;
 
+use mortscode\reviews\models\QuestionModel;
 use mortscode\reviews\models\RecaptchaModel;
 use mortscode\reviews\Reviews;
 use mortscode\reviews\models\ImportedReviewModel;
@@ -206,6 +207,21 @@ class ReviewsService extends Component
     }
 
     /**
+     * @param string $ip
+     * @return array|null
+     */
+    public function getLocationByIp(string $ip): ?array
+    {
+        $location = @json_decode(file_get_contents("https://ipinfo.io/{$ip}/json"), true);
+
+        if ($location['bogon']) {
+            return [];
+        }
+
+        return $location;
+    }
+
+    /**
      * @param int $reviewId
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
@@ -262,7 +278,7 @@ class ReviewsService extends Component
     /**
      * createReviewRecord
      *
-     * @param $review ReviewModel|ImportedReviewModel
+     * @param $review ReviewModel|QuestionModel
      * @return bool
      */
     public function createReviewRecord($review): bool
@@ -271,10 +287,13 @@ class ReviewsService extends Component
         $reviewsRecord->entryId = $review->entryId;
         $reviewsRecord->name = $review->name;
         $reviewsRecord->email = $review->email;
-        $reviewsRecord->rating = $review->rating;
+        $reviewsRecord->rating = $review->rating ?? null;
         $reviewsRecord->comment = $review->comment;
         $reviewsRecord->status = $review->status;
         $reviewsRecord->response = $review->response;
+        $reviewsRecord->ipAddress = $review->ipAddress;
+        $reviewsRecord->userAgent = $review->userAgent;
+        $reviewsRecord->reviewType = $review->reviewType;
 
         // save record in DB
         return $reviewsRecord->save();

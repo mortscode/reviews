@@ -1,6 +1,6 @@
-# Reviews plugin for Craft CMS 3.x
+# Reviews Plugin
 
-An entry reviews plugin
+An entry comments & reviews plugin for Craft CMS 3.x
 
 ![Screenshot](resources/img/plugin-logo.png)
 
@@ -24,19 +24,27 @@ To install the plugin, follow these instructions.
 
 ## Reviews Overview
 
-### Create Reviews
+The Reviews plugin provides 2 types of forms for your users: Reviews & Questions. The idea is that sometimes you're looking for an actual review from users, other times, you just want to provide a way for users to ask questions or leave a suggestion. Below you'll find the 2 forms aimed at these 2 types of users.
 
-Add the following form to create a review:
+### Review Form
+
+Required Fields:
+- Name
+- Email
+
+Review-specific Fields:
+- Rating
 
 ```twig
 <form id="reviews-form" class="er-form__form js-reviews-form" role="form" method="post" accept-charset="UTF-8">
     {{ hiddenInput('action', 'reviews/reviews/save') }}
     {{ hiddenInput('entryId', entry.id) }}
     {{ hiddenInput('token', "", {class: 'js-token-input'}) }}
+    {{ hiddenInput('reviewType', 'review') }}
     {{ csrfInput() }}
     <input type="text" name="name" placeholder="name">
     <input type="email" name="email" placeholder="email">
-    <div class="er-form__rating">
+    <div>
         <input type="radio" id="rating-1" name="rating" value="1"><label for="rating-1">1</label>
         <input type="radio" id="rating-2" name="rating" value="2"><label for="rating-2">2</label>
         <input type="radio" id="rating-3" name="rating" value="3"><label for="rating-3">3</label>
@@ -44,7 +52,25 @@ Add the following form to create a review:
         <input type="radio" id="rating-5" name="rating" value="5"><label for="rating-5">5</label>
     </div>
     <textarea name="comment" id="comment" cols="30" rows="10"></textarea>
-    <button class="er-form__button" type="submit">Let's Go!</button>
+    <button type="submit">Submit!</button>
+</form>
+```
+
+### Questions Form
+
+Add the following form to enable users to ask questions (no ratings):
+
+```twig
+<form id="reviews-form" class="er-form__form js-reviews-form" role="form" method="post" accept-charset="UTF-8">
+    {{ hiddenInput('action', 'reviews/reviews/save') }}
+    {{ hiddenInput('entryId', entry.id) }}
+    {{ hiddenInput('token', "", {class: 'js-token-input'}) }}
+    {{ hiddenInput('reviewType', 'question') }}
+    {{ csrfInput() }}
+    <input type="text" name="name" placeholder="name">
+    <input type="email" name="email" placeholder="email">
+    <textarea name="comment" id="comment" cols="30" rows="10"></textarea>
+    <button type="submit">Submit!</button>
 </form>
 ```
 

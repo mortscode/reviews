@@ -123,6 +123,17 @@ class ReviewsVariable
     }
 
     /**
+     * getLocationByIp
+     *
+     * @param string $ip
+     * @return array
+     */
+    public function getLocationByIp(string $ip): array
+    {
+        return Reviews::$plugin->reviewsService->getLocationByIp($ip);
+    }
+
+    /**
      * getStatusValues
      *
      * @return array
