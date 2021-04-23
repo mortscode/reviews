@@ -7,6 +7,7 @@
 
 {% set entry = craft.entries.id(entryId).one() %}
 {% set review = craft.reviews.getReviewById(reviewId) %}
+{% set location = craft.reviews.getLocationByIp(review.ipAddress) %}
 
 {% set title = entry.title %}
 
@@ -39,6 +40,33 @@
 			value: review.status ?? null
 		}) }}
 	</div>
+	<div class="meta read-only">
+		<div class="data">
+			<h5 class="heading">Posted:</h5>
+			<div class="value">
+				<span class="user-agent">{{ review.dateCreated|date() }}</span>
+			</div>
+			<h5 class="heading">Updated:</h5>
+			<div class="value">
+				<span class="user-agent">{{ review.dateUpdated|date() }}</span>
+			</div>
+			<h5 class="heading">Device:</h5>
+			<div class="value">
+				<span class="user-agent">{{ review.userAgent }}</span>
+			</div>
+			{% if location %}
+				<h5 class="heading">Location:</h5>
+				<div class="value">
+					<span class="user-agent">{{ location.city }}, {{ location.region }}, {{ location.country }}</span>
+				</div>
+			{% else %}
+				<h5 class="heading">IP Address:</h5>
+				<div class="value">
+					<span class="user-agent">{{ review.ipAddress }}</span>
+				</div>
+			{% endif %}
+		</div>
+	</div>
 {% endblock %}
 
 {% block content %}
@@ -51,14 +79,14 @@
 	<input type="hidden" name="comment" value="{{ review.comment }}">
 	{{ redirectInput('reviews') }}
 
-	<div id="rating">
-		<div class="rating-content">
-			<h1 class="rating-name">{{ review.name }}</h1>
-			<p class="rating-email">{{ review.email }}</p>
-			<p class="rating-rating">Rating:
+	<div id="review">
+		<div class="review-content">
+			<h1 class="review-name">{{ review.name }}</h1>
+			<p class="review-email">{{ review.email }}</p>
+			<p class="review-rating">Rating:
 				{{ review.rating }}
 				/ 5</p>
-			<p class="rating-comment">{{ review.comment }}</p>
+			<p class="review-comment">{{ review.comment }}</p>
 		</div>
 		<hr>
 		{{ forms.textAreaField({

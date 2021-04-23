@@ -118,6 +118,7 @@ class Install extends Migration
                     'status' => $this->enum('status', ['approved', 'pending', 'spam', 'trashed']),
                     'ipAddress' => $this->string(),
                     'userAgent' => $this->string(),
+                    'reviewType' => $this->enum('reviewType', ['review', 'question']),
                 ]
             );
         }

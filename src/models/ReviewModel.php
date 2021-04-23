@@ -10,9 +10,8 @@
 
 namespace mortscode\reviews\models;
 
-use mortscode\reviews\Reviews;
+use mortscode\reviews\enums\ReviewType;
 
-use Craft;
 use craft\base\Model;
 
 /**
@@ -76,21 +75,21 @@ class ReviewModel extends Model
     /**
      * comment
      *
-     * @var text
+     * @var string
      */
     public $comment = null;
     
     /**
      * response
      *
-     * @var text
+     * @var string
      */
     public $response = null;
 
     /**
      * status
      *
-     * @var enum
+     * @var string
      */
     public $status = null;
 
@@ -107,6 +106,13 @@ class ReviewModel extends Model
      * @var string
      */
     public $userAgent = null;
+
+    /**
+     * reviewType
+     *
+     * @var string
+     */
+    public $reviewType = ReviewType::Review;
 
 
     // Public Methods
@@ -127,7 +133,7 @@ class ReviewModel extends Model
         return [
             // the name, email attributes are required
             [
-                ['name', 'email'],
+                ['name', 'email', 'reviewType'],
                 'required',
                 'message' => '{attribute} is required'
             ],

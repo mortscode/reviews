@@ -12,6 +12,8 @@ namespace mortscode\reviews\controllers;
 
 use craft\elements\Entry;
 use craft\errors\MissingComponentException;
+use mortscode\reviews\enums\ReviewType;
+use mortscode\reviews\models\QuestionModel;
 use mortscode\reviews\models\ReviewModel;
 use mortscode\reviews\Reviews;
 use mortscode\reviews\enums\ReviewStatus;
@@ -23,7 +25,6 @@ use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
 use GuzzleHttp\Client;
-use mortscode\reviews\models\ImportedReviewModel;
 use SimpleXMLElement;
 
 /**
@@ -414,7 +415,7 @@ class ReviewsController extends Controller
                     continue;
                 }
                 
-                $newReview = new ImportedReviewModel();
+                $newReview = new QuestionModel();
     
                 $response = [];
 
@@ -433,10 +434,10 @@ class ReviewsController extends Controller
                 $newReview->entryId = $entry->id ?? '';
                 $newReview->name = $thread->name ?? $comment['name'];
                 $newReview->email = $thread->email ?? '';
-                $newReview->rating = $thread->rating ?? null;
                 $newReview->comment = $comment['message'] ?? 'MESSAGE ERROR';
                 $newReview->response = $response[0] ?? null;
                 $newReview->status = ReviewStatus::Pending;
+                $newReview->reviewType = ReviewType::Question;
                 
                 // review is valid, let's create the record
                 $createReview = Reviews::$plugin->reviews->createReviewRecord($newReview);
@@ -456,17 +457,23 @@ class ReviewsController extends Controller
     }
 
     /**
-     * @return ReviewModel
+     * @return ReviewModel|QuestionModel
      * @throws BadRequestHttpException
      */
-    private function _setReviewFromPost(): ReviewModel
+    private function _setReviewFromPost()
     {
         $request = Craft::$app->getRequest();
+        $reviewType = $request->getParam('reviewType');
 
         $settings = Reviews::$plugin->getSettings();
-        
-        $review = new ReviewModel();
-        
+
+        if ($reviewType == ReviewType::Question) {
+            $review = new QuestionModel();
+        } else {
+            $review = new ReviewModel();
+            $review->rating = $request->getParam('rating', $review->rating);
+        }
+
         // get IP and User Agent
         $review->ipAddress = $request->getUserIP();
         $review->userAgent = $request->getUserAgent();
@@ -475,7 +482,6 @@ class ReviewsController extends Controller
         $review->entryId = $request->getRequiredParam('entryId', $review->entryId);
         $review->name = $request->getRequiredParam('name', $review->name);
         $review->email = $request->getRequiredParam('email', $review->email);
-        $review->rating = $request->getParam('rating', $review->rating);
         $review->comment = $request->getParam('comment', $review->comment);
         $review->status = $settings->defaultStatus;
 
